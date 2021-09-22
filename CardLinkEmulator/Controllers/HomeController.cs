@@ -76,7 +76,7 @@ namespace CardLinkEmulator.Controllers
             var message = "";
             var redirectionUrl = pmt.confirmUrl;
             var concatStr = "";
-            var payMethod = pmt.status == Status.CAPTURED.ToString() ? CommonHelper.FindCreditCardType(pmt.cardNum).ToString() : "";
+            var payMethod = status.ToLowerInvariant() == Status.CAPTURED.ToString().ToLowerInvariant() ? CommonHelper.FindCreditCardType(pmt.cardNum).ToString() : "";
 
             Payment payment = _paymentRepository.GetById(pmt.Id);
 
@@ -114,6 +114,7 @@ namespace CardLinkEmulator.Controllers
                 payment.message = message;
 
                 concatStr = GetConcatenatedString(pmt, status, message, riskScore, payMethod, txId, paymentRef, secret);
+
                 payment.digest = CommonHelper.HashCode(concatStr);
 
                 _paymentRepository.SavePayment(payment);
@@ -266,6 +267,7 @@ namespace CardLinkEmulator.Controllers
             string secret
         ) {
             var concatStr = string.Concat(
+                "2",
                 pmt.mid,
                 pmt.orderid,
                 status,
