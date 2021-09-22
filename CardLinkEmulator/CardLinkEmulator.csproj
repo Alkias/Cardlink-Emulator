@@ -214,7 +214,7 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Home\Pay.cshtml" />
     <Content Include="Views\Home\Pay - Copy.cshtml" />
-    <Content Include="Views\Home\BackCofirmation.cshtml" />
+    <Content Include="Views\Home\BackConfirmation.cshtml" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

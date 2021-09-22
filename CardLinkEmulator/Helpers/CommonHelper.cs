@@ -13,7 +13,7 @@ namespace CardLinkEmulator.Helpers
         private static Random random = new Random();
 
         /// <summary>
-        /// Generates a SHA1 hash string
+        /// Generates a SHA256 hash string
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
@@ -25,12 +25,6 @@ namespace CardLinkEmulator.Helpers
                 sHA.ComputeHash(bytes);
                 returnedHash = Convert.ToBase64String(sHA.Hash);
                 return returnedHash;
-
-                //var hash = SHA1.Create();
-                //var encoder = new UTF8Encoding();
-                //var combined = encoder.GetBytes(str);
-                //hash.ComputeHash(combined);
-                //returnedHash = Convert.ToBase64String(hash.Hash);
             }
             catch (Exception ex) {
                 var exMessage = "Error in HashCode : " + ex.Message;
@@ -47,7 +41,7 @@ namespace CardLinkEmulator.Helpers
         /// <param name="cardNumber">Card Number</param>
         /// <returns></returns>
         public static CardType FindCreditCardType (string cardNumber) {
-
+            //https://www.regular-expressions.info/creditcard.html
 
             if (Regex.Match(cardNumber, @"^4[0-9]{12}(?:[0-9]{3})?$").Success) {
                 return CardType.Visa;

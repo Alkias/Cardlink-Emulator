@@ -4,8 +4,6 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -18,11 +16,21 @@ namespace CardLinkEmulator.Controllers
 {
     public class HomeController : Controller
     {
+        #region Fields
+
         private readonly IPaymentRepository _paymentRepository;
+
+        #endregion
+
+        #region Ctor
 
         public HomeController (IPaymentRepository paymentRepository) {
             _paymentRepository = paymentRepository;
         }
+
+        #endregion
+
+        #region Methods
 
         public ActionResult Index() {
             return View();
@@ -47,9 +55,8 @@ namespace CardLinkEmulator.Controllers
 
         [HttpPost]
         public ActionResult Pay (PaymentModel pmt) {
-
-          var isDigestValid =  CheckDigest(pmt);
-          pmt.isDigestValid = isDigestValid;
+            var isDigestValid = CheckDigest(pmt);
+            pmt.isDigestValid = isDigestValid;
 
             if (isDigestValid) {
                 var payment = InsertPayment(pmt);
@@ -60,51 +67,18 @@ namespace CardLinkEmulator.Controllers
             return View(pmt);
         }
 
-        private bool CheckDigest (PaymentModel pmt) {
-            //Billing address state (str 2 3166-2 country subdivision code). this value only applies to countries that have states (e.g USA). For Greece, strongly recommended to be omitted 
-            //var billState = string.IsNullOrWhiteSpace(pmt.billState) ? "" : pmt.billState;
-            var extInstallmentoffset = string.IsNullOrWhiteSpace(pmt.extInstallmentoffset) ? "" : pmt.extInstallmentoffset;
-            var extInstallmentperiod = string.IsNullOrWhiteSpace(pmt.extInstallmentperiod) ? "" : pmt.extInstallmentperiod;
-            var secret = ConfigurationManager.AppSettings["secret"];
-            var version = string.IsNullOrWhiteSpace(pmt.Version) ? "" : pmt.Version;
-
-            var concatenatedFields =
-                version
-                + pmt.mid
-                + pmt.lang
-                + pmt.orderid
-                + pmt.orderDesc
-                + pmt.orderAmount.ToString().Replace(",", ".")
-                + pmt.currency
-                + pmt.payerEmail
-                + pmt.billCountry
-                //+ billState
-                + pmt.billZip
-                + pmt.billCity
-                + pmt.billAddress
-                + extInstallmentoffset
-                + extInstallmentperiod
-                + pmt.confirmUrl
-                + pmt.cancelUrl
-                + secret;
-
-            var computedDigest = CommonHelper.HashCode(concatenatedFields);
-            pmt.calculatedDigest = computedDigest;
-
-            return computedDigest == pmt.digest;
-
-        }
-
         public async Task<ActionResult> ProcessPaymentAsync (PaymentModel pmt) {
             var secret = ConfigurationManager.AppSettings["secret"];
             var status = Status.CAPTURED.ToString();
             var riskScore = "0";
-            var payMethod = pmt.status == Status.CAPTURED.ToString() ? CommonHelper.FindCreditCardType(pmt.cardNum).ToString() : "";
             var txId = CommonHelper.UniqueRandomNumbersInRange(11);
             var paymentRef = CommonHelper.UniqueRandomNumbersInRange(6);
             var message = "";
             var redirectionUrl = pmt.confirmUrl;
             var concatStr = "";
+            var payMethod = pmt.status == Status.CAPTURED.ToString() ? CommonHelper.FindCreditCardType(pmt.cardNum).ToString() : "";
+
+            Payment payment = _paymentRepository.GetById(pmt.Id);
 
             if (ModelState.IsValid) {
                 switch (pmt.status) {
@@ -131,16 +105,15 @@ namespace CardLinkEmulator.Controllers
                         break;
                 }
 
-                Payment payment = _paymentRepository.GetById(pmt.Id);
                 payment.cardNum = pmt.cardNum;
                 payment.riskScore = riskScore;
+                payment.status = status;
                 payment.payMethod = payMethod;
                 payment.txId = txId;
                 payment.paymentRef = paymentRef;
                 payment.message = message;
-                payment.status = status;
 
-                concatStr = GetConcatenedString(pmt, status, message, riskScore, payMethod, txId, paymentRef, secret);
+                concatStr = GetConcatenatedString(pmt, status, message, riskScore, payMethod, txId, paymentRef, secret);
                 payment.digest = CommonHelper.HashCode(concatStr);
 
                 _paymentRepository.SavePayment(payment);
@@ -161,14 +134,11 @@ namespace CardLinkEmulator.Controllers
             data.Add("orderAmount", pmt.orderAmount.ToString().Replace(",", "."));
             data.Add("currency", pmt.currency);
             data.Add("paymentTotal", pmt.orderAmount.ToString().Replace(",", "."));
-
             data.Add("message", message);
             data.Add("riskScore", riskScore);
             data.Add("payMethod", payMethod);
             data.Add("txId", txId);
             data.Add("paymentRef", paymentRef);
-
-            // concatStr = GetConcatenedString(pmt, status, message, riskScore, payMethod, txId, paymentRef, secret);
             data.Add("digest", CommonHelper.HashCode(concatStr));
 
             foreach (string key in data) {
@@ -185,42 +155,24 @@ namespace CardLinkEmulator.Controllers
             return Content("Redirected");
         }
 
-        private static string GetConcatenedString (PaymentModel pmt, string status, string message, string riskScore, string payMethod, string txId, string paymentRef, string secret) {
-            var concatStr = string.Concat(
-                pmt.mid,
-                pmt.orderid,
-                status,
-                pmt.orderAmount.ToString().Replace(",", "."),
-                pmt.currency,
-                pmt.orderAmount.ToString().Replace(",", "."),
-                message,
-                riskScore,
-                payMethod,
-                txId,
-                paymentRef,
-                secret
-            );
-            return concatStr;
-        }
-
-        public ActionResult BackCofirmation (int paymentId) {
+        public ActionResult BackConfirmation (int paymentId) {
             // Get and Update Payment
             var p = _paymentRepository.GetById(paymentId);
             p.DateReposted = DateTime.Now;
             _paymentRepository.SavePayment(p);
 
             string data = "mid" + "=" + p.mid + "&" +
-                        "orderid" + "=" +p.orderid + "&" +
-                        "status" + "=" + Server.UrlEncode(p.status) + "&" +
-                        "orderAmount" + "=" + p.orderAmount + "&" +
-                        "currency" + "=" + p.currency + "&" +
-                        "paymentTotal" + "=" + p.orderAmount + "&" +
-                        "message" + "=" + p.message + "&" +
-                        "riskScore" + "=" + p.riskScore + "&" +
-                        "payMethod" + "=" + p.payMethod + "&" +
-                        "txId" + "=" + p.txId + "&" +
-                        "paymentRef" + "=" + p.paymentRef + "&" +
-                        "digest" + "=" + Server.UrlEncode(p.digest);
+                          "orderid" + "=" + p.orderid + "&" +
+                          "status" + "=" + Server.UrlEncode(p.status) + "&" +
+                          "orderAmount" + "=" + p.orderAmount + "&" +
+                          "currency" + "=" + p.currency + "&" +
+                          "paymentTotal" + "=" + p.orderAmount + "&" +
+                          "message" + "=" + p.message + "&" +
+                          "riskScore" + "=" + p.riskScore + "&" +
+                          "payMethod" + "=" + p.payMethod + "&" +
+                          "txId" + "=" + p.txId + "&" +
+                          "paymentRef" + "=" + p.paymentRef + "&" +
+                          "digest" + "=" + Server.UrlEncode(p.digest);
 
             var redirectionUrl = p.status == "CAPTURED" ? p.confirmUrl : p.cancelUrl;
 
@@ -255,90 +207,87 @@ namespace CardLinkEmulator.Controllers
                 dataStream.Close();
 
                 // Get the response.
-
                 WebResponse response = request.GetResponse();
+
                 var responseStatus = ((HttpWebResponse) response).StatusDescription;
+
                 response.Close();
             }
-            catch (Exception ex) { }
-
-            // Display the status.
-
-            //Console.WriteLine(((HttpWebResponse)response).StatusDescription);
-
-            /*
-            // Get the stream containing content returned by the server.
-            // The using block ensures the stream is automatically closed.
-            using (dataStream = response.GetResponseStream())
-            {
-                // Open the stream using a StreamReader for easy access.
-                StreamReader reader = new StreamReader(dataStream);
-                // Read the content.
-                string responseFromServer = reader.ReadToEnd();
-                // Display the content.
-                Console.WriteLine(responseFromServer);
+            catch (Exception) {
+                //do nothing
             }
-            */
-
-            // Close the response.
 
             return View();
         }
 
-        public async Task<ActionResult> BackCofirmation_DD (int paymentId) {
-            // Get and Update Payment
-            var p = _paymentRepository.GetById(paymentId);
-            p.DateReposted = DateTime.Now;
-            _paymentRepository.SavePayment(p);
+        #endregion
 
-            string data = "mid" + "=" + p.mid + "&" +
-                          "orderid" + "=" + p.orderid + "&" +
-                          "status" + "=" + p.status + "&" +
-                          "orderAmount" + "=" + p.orderAmount + "&" +
-                          "currency" + "=" + p.currency + "&" +
-                          "paymentTotal" + "=" + p.orderAmount + "&" +
-                          "message" + "=" + p.message + "&" +
-                          "riskScore" + "=" + p.riskScore + "&" +
-                          "payMethod" + "=" + p.payMethod + "&" +
-                          "txId" + "=" + p.txId + "&" +
-                          "paymentRef" + "=" + p.paymentRef + "&" +
-                          "paymentRef" + "=" + p.paymentRef + "&" +
-                          "digest" + "=" + p.digest;
+        #region Privates
 
-            var redirectionUrl = p.status == "CAPTURED" ? p.confirmUrl : p.cancelUrl;
+        private bool CheckDigest (PaymentModel pmt) {
+            var extInstallmentoffset = string.IsNullOrWhiteSpace(pmt.extInstallmentoffset) ? "" : pmt.extInstallmentoffset;
+            var extInstallmentperiod = string.IsNullOrWhiteSpace(pmt.extInstallmentperiod) ? "" : pmt.extInstallmentperiod;
+            var secret = ConfigurationManager.AppSettings["secret"];
+            var version = string.IsNullOrWhiteSpace(pmt.Version) ? "" : pmt.Version;
 
-            HttpClient client = new HttpClient();
-            var uri = redirectionUrl;
+            var concatenatedFields =
+                version
+                + pmt.mid
+                + pmt.lang
+                + pmt.orderid
+                + pmt.orderDesc
+                + pmt.orderAmount.ToString().Replace(",", ".")
+                + pmt.currency
+                + pmt.payerEmail
+                + pmt.billCountry
+                + pmt.billZip
+                + pmt.billCity
+                + pmt.billAddress
+                + extInstallmentoffset
+                + extInstallmentperiod
+                + pmt.confirmUrl
+                + pmt.cancelUrl
+                + secret;
 
-            HttpResponseMessage response;
+            var computedDigest = CommonHelper.HashCode(concatenatedFields);
+            pmt.calculatedDigest = computedDigest;
 
-            var body = data;
+            return computedDigest == pmt.digest;
+        }
 
-            // Request body
-            var byteData = Encoding.UTF8.GetBytes(body);
+        private static string GetConcatenatedString (
+            PaymentModel pmt,
+            string status,
+            string message,
+            string riskScore,
+            string payMethod,
+            string txId,
+            string paymentRef,
+            string secret
+        ) {
+            var concatStr = string.Concat(
+                pmt.mid,
+                pmt.orderid,
+                status,
+                pmt.orderAmount.ToString().Replace(",", "."),
+                pmt.currency,
+                pmt.orderAmount.ToString().Replace(",", "."),
+                message,
+                riskScore,
+                payMethod,
+                txId,
+                paymentRef,
+                secret
+            );
+            return concatStr;
+        }
 
-            using (var content = new ByteArrayContent(byteData)) {
-                //content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
-
-                response = await client.PostAsync(uri, content);
-
-                var responseStatus = response.IsSuccessStatusCode;
-
-                //if (!response.IsSuccessStatusCode)
-                //{
-                //    abiResponse.Success = false;
-                //    return Ok(abiResponse);
-                //}
-
-                //abiResponse.Success = true;
-
-                //await Logger.Info($"ABI was successfully created at: {DateTime.UtcNow.ToShortTimeString()}", this.URL());
-
-                //return Ok(abiResponse);
-            }
-
-            return View();
+        private Payment InsertPayment (PaymentModel pmt) {
+            var payment = new Payment();
+            PaymentToEntity(pmt, payment);
+            payment.DateInserted = DateTime.Now;
+            _paymentRepository.SavePayment(payment);
+            return payment;
         }
 
         private void PaymentToEntity (PaymentModel model, Payment payment) {
@@ -360,14 +309,6 @@ namespace CardLinkEmulator.Controllers
             payment.cancelUrl = model.cancelUrl;
             payment.digest = model.digest;
             payment.cardNum = model.cardNum;
-        }
-
-        private Payment InsertPayment (PaymentModel pmt) {
-            var payment = new Payment();
-            PaymentToEntity(pmt, payment);
-            payment.DateInserted = DateTime.Now;
-            _paymentRepository.SavePayment(payment);
-            return payment;
         }
 
         private PaymentModel PaymentToModel (Payment payment) {
@@ -393,5 +334,7 @@ namespace CardLinkEmulator.Controllers
                 cardNum = payment.cardNum
             };
         }
+
+        #endregion
     }
 }
