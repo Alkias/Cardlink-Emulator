@@ -182,6 +182,7 @@
     <Content Include="Content\cardlink-eurobank\css\fonts\EurobankSans-Bold.woff" />
     <Content Include="Content\cardlink-eurobank\css\fonts\EurobankSans-Light.woff" />
     <Content Include="Content\cardlink-eurobank\css\fonts\EurobankSans-Regular.woff" />
+    <Content Include="App_Data\CardLinkEmulator_db.zip" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.3.1.js" />
@@ -215,9 +216,7 @@
     <Content Include="Views\Home\Pay - Copy.cshtml" />
     <Content Include="Views\Home\BackCofirmation.cshtml" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="App_Data\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
