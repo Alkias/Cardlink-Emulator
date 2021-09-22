@@ -1,0 +1,521 @@
+﻿@model CardLinkEmulator.Models.PaymentModel
+@{
+    Layout = null;
+    ViewBag.Title = "Home Page";
+}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eurobank e-Commerce</title>
+    <link href="/Content/cardlink-eurobank/css/vpos3_euro.css?v=1" rel="stylesheet" type="text/css">
+    <script src="/Content/cardlink-eurobank/js/scripts.js?v=7"></script>
+    <script type="text/javascript" src="/Content/cardlink-eurobank/js/vpos.js?v=3"></script>
+
+    <style>
+        .overlay {
+            position: fixed;
+            width: 100%;
+            text-align: center;
+            background-color: gray;
+            font-size: 20px;
+            height: 100%;
+            opacity: 0.5;
+            display: none;
+            z-index: 100;
+        }
+
+        .overlay-content {
+            width: 200px;
+            height: 600px;
+            /*background-color: blue;*/
+            position: absolute;
+            /*Can also be `fixed`*/
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+            /*Solves a problem in which the content is being cut when the div is smaller than its' wrapper:*/
+            max-width: 100%;
+            max-height: 100%;
+            overflow: auto;
+            z-index: 101;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="overlay">
+        <div class="overlay-content">
+            <h1>Παρακαλώ Περιμένετε</h1>
+        </div>
+    </div>
+    <div style="color: red; position: fixed; height: 15px; width: 800px; top: 0px; z-Index:100;">
+        <b>
+            Notice: This is a
+            test system, do not use real cards or attempt to make real payments on this page!
+        </b>
+    </div>
+    @if (Model.isDigestValid)
+    {
+        <div id="outer">
+            <div id="popup">
+                <center>
+                    <div class="order">
+                        <form name="payform" id="payform1" method="POST" action="@Url.Action("ProcessPaymentAsync","Home")" accept_charset="UTF-8">
+                            <input name="Id" id="Id" type="hidden" value="@(Model.Id)">
+                            <input name="mid" id="mid" type="hidden" value="@(Model.mid)">
+                            <input name="orderid" id="orderid" type="hidden" value="@(Model.orderid)">
+                            <input name="orderAmount" id="orderAmount" type="hidden" value="@(Model.orderAmount)">
+                            <input name="currency" id="currency" type="hidden" value="@(Model.currency)">
+                            <input name="cardNum" id="cardNum" type="hidden" value="">
+                            <input name="confirmUrl" id="confirmUrl" type="hidden" value="@Model.confirmUrl">
+                            <input name="cancelUrl" id="cancelUrl" type="hidden" value="@Model.cancelUrl">
+
+                            <div id="div_left">
+                                <div class="empty_element">&nbsp;</div>
+                                <div class="div_left_inner">
+
+                                    <img src="~/Content/cardlink-eurobank/images/eurobank.png" class="img_center">
+
+                                    <p id="txt_redirect">Έχετε μεταφερθεί στο ασφαλές περιβάλλον πληρωμών της Eurobank.</p>
+                                    <p id="txt_trans_details">Λεπτομέρειες Συναλλαγής</p>
+
+                                    <img src="" class="img_center">
+
+                                    <table id="tbl_details">
+                                        <tbody>
+                                            <tr>
+                                                <td class="td_left-aln">Επιχείρηση:</td>
+                                                <td>TEST</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="td_left-aln">Ιστοσελίδα:</td>
+                                                <td>https://test.gr/</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <div id="div_order_amt">
+                                        <p class="txt_order_amt">
+                                            Ποσό Παραγγελίας:
+                                            <span id="txt_order_amt_val"><br>@(Model.orderAmount)&nbsp;€</span>
+                                        </p>
+                                    </div>
+
+                                    <div class="img_group">
+                                        <a href="http://www.visa.gr/gr/kaptec_yia_onouc/online_ayopec/verified_by_visa.aspx"
+                                        target="_blank" style="text-decoration: none">
+                                            <img src="~/Content/cardlink-eurobank/images/visa_verified.png">
+                                        </a>
+                                        <a href="http://www.mastercard.com/gr/consumer/secure-code.html" target="_blank"
+                                        style="text-decoration: none">
+                                            <img src="~/Content/cardlink-eurobank/images/mastercard_securecode.png">
+                                        </a>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div id="div_right">
+                                <div class="div_right_inner">
+                                    <table>
+                                        <tbody id="FirstPage" style="display: none">
+                                            <tr class="odd">
+                                                <td colspan="3" class="txt_enter_card">
+                                                    <p id="txt_intro_pay_wallet_gr">Πληρωμή με ψηφιακό πορτοφόλι</p>
+                                                </td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td colspan="3" class="column1"></td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td colspan="3" class="txt_enter_card">
+                                                    <p id="txt_intro_enter_card_gr">
+                                                        <b>ή</b> εισάγετε την κάρτα σας
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td colspan="3">
+                                                    <div class="paymentMethodHolder">
+                                                        <img align="middle" style="float:left;cursor:pointer;" vspace="0"
+                                                        src="~/Content/cardlink-eurobank/images/euro_new/visa.png"
+                                                        alt="Visa" class="img_grp_td img_grp"
+                                                        onclick="displayElement('cardForm');displayElement('buttons');displayElement('FirstPage');">
+                                                        <img align="middle" style="float:left;cursor:pointer;" vspace="0"
+                                                        src="~/Content/cardlink-eurobank/images/euro_new/mastercard.png"
+                                                        alt="Mastercard" class="img_grp_td img_grp"
+                                                        onclick="displayElement('cardForm');displayElement('buttons');displayElement('FirstPage');">
+                                                        <img align="middle" style="float:left;cursor:pointer;" vspace="0"
+                                                        src="~/Content/cardlink-eurobank/images/euro_new/maestro.png"
+                                                        alt="Maestro" class="img_grp_td img_grp"
+                                                        onclick="displayElement('cardForm');displayElement('buttons');displayElement('FirstPage');">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>&nbsp;</td>
+                                            </tr>
+                                            <tr>
+                                                <td>&nbsp;</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td colspan="3">
+                                                    <div class="div_btn_cancel">
+                                                        <input class="btn btn_cancel" id="cancelBtn" type="submit"
+                                                        name="cancel" value="ΑΚΥΡΩΣΗ">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        <tbody>
+                                            <tr></tr>
+                                        </tbody>
+                                    </table>
+                                    <table class="textMain" style="display: block" id="cardForm">
+                                        <tbody>
+                                            <tr class="odd" style="display: inherit">
+                                                <td id="btn_back"></td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td colspan="3">
+                                                    <p class="txt_enter_card_in">Συμπληρώστε την κάρτα σας:</p>
+                                                </td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td colspan="3">
+                                                    <div class="paymentMethodHolder" style="display: none">
+                                                        <div class="radiogroup">
+                                                            <input type="radio" id="visa" name="paymentMethod" value="visa"
+                                                            style="visibility: hidden">
+                                                        </div>
+                                                        <div class="radiogroup">
+                                                            <input type="radio" id="mastercard" name="paymentMethod"
+                                                            value="mastercard" style="visibility: hidden">
+                                                        </div>
+                                                        <div class="radiogroup">
+                                                            <input type="radio" id="maestro" name="paymentMethod"
+                                                            value="maestro" style="visibility: hidden">
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="placeholder_top">
+                                                        <input type="text" id="card.pan" name="card.pan" maxlength="23"
+                                                        value="" onfocus="setOldPan(this.value)"
+                                                        onblur="CheckPanAndSubmitCard(this.value, null, 'payform1', 'refresh');"
+                                                        class="inp_full" placeholder="Αριθμός Κάρτας">
+                                                        <span id="cardpan_placeholder" class="placeholder"
+                                                        style="color: rgb(255, 255, 255);">Αριθμός Κάρτας</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div id="div_card_date">
+                                                        <label for="card.expiryMonth" class="lbl_top">
+                                                            Ημερομηνία
+                                                            Λήξης
+                                                        </label>
+                                                        <div class="placeholder_top">
+                                                            <select id="card.expiryMonth" name="card.expiryMonth"
+                                                            class="inp_date">
+                                                                <option value="" hidden="true" selected="true">
+                                                                    Μήνας
+                                                                </option>
+                                                                <option value="1">01</option>
+                                                                <option value="2">02</option>
+                                                                <option value="3">03</option>
+                                                                <option value="4">04</option>
+                                                                <option value="5">05</option>
+                                                                <option value="6">06</option>
+                                                                <option value="7">07</option>
+                                                                <option value="8">08</option>
+                                                                <option value="9">09</option>
+                                                                <option value="10">10</option>
+                                                                <option value="11">11</option>
+                                                                <option value="12">12</option>
+                                                            </select>
+                                                            <span id="monthsel_placeholder" class="placeholder"
+                                                            style="color: rgb(255, 255, 255);">Μήνας</span>
+                                                        </div>
+                                                        /
+                                                        <div class="placeholder_top">
+                                                            <select id="card.expiryYear" name="card.expiryYear"
+                                                            class="inp_date">
+                                                                <option value="" hidden="true" selected="true">Έτος</option>
+                                                                <option value="2021">2021</option>
+                                                                <option value="2022">2022</option>
+                                                                <option value="2023">2023</option>
+                                                                <option value="2024">2024</option>
+                                                                <option value="2025">2025</option>
+                                                                <option value="2026">2026</option>
+                                                                <option value="2027">2027</option>
+                                                                <option value="2028">2028</option>
+                                                                <option value="2029">2029</option>
+                                                                <option value="2030">2030</option>
+                                                                <option value="2031">2031</option>
+                                                                <option value="2032">2032</option>
+                                                                <option value="2033">2033</option>
+                                                                <option value="2034">2034</option>
+                                                                <option value="2035">2035</option>
+                                                                <option value="2036">2036</option>
+                                                                <option value="2037">2037</option>
+                                                                <option value="2038">2038</option>
+                                                                <option value="2039">2039</option>
+                                                                <option value="2040">2040</option>
+                                                            </select>
+                                                            <span id="yearsel_placeholder" class="placeholder"
+                                                            style="color: rgb(255, 255, 255);">Έτος</span>
+                                                        </div>
+                                                    </div>
+                                                    <div id="div_card_cvv">
+                                                        <label for="card.cvv" class="lbl_top">
+                                                            Κωδ. Επαλήθευσης<a href="#" class="tooltip"
+                                                            onclick="return toggleTooltip();">
+                                                                <div id="info_icon">
+                                                                    ⓘ
+                                                                    <div id="tooltip_top">
+                                                                        <span id="tooltip" class="closedTooltip"
+                                                                        onfocus="toggleTooltip();">
+                                                                            <div class="left">
+                                                                                <strong>CVV2 / CVC2</strong>
+                                                                                <br>Ο κωδικός CVV2 (Card Validation Value)
+                                                                                της VISA ή ο κωδικός CVC2 (Card Validation
+                                                                                Code) της Mastercard είναι ένας 3ψήφιος
+                                                                                κωδικός που αναγράφεται στο πίσω μέρος της
+                                                                                πιστωτικής/χρεωστικής σας κάρτας.
+                                                                            </div>
+                                                                            <div class="right">
+                                                                                <img
+                                                                                src="~/Content/cardlink-eurobank/images/CVV.JPG">
+                                                                            </div>
+                                                                            <div class="left">
+                                                                                <strong>CID / 4DBC</strong>
+                                                                                <br>
+                                                                                Ο κωδικός CID ή 4DBC της American Express
+                                                                                είναι ένας 4ψήφιος
+                                                                                κωδικός που αναγράφεται στο εμπρός μέρος της
+                                                                                πιστωτικής /
+                                                                                χρεωστικής σας κάρτας
+                                                                            </div>
+                                                                            <div class="right">
+                                                                                <img
+                                                                                src="~/Content/cardlink-eurobank/images/CID.JPG">
+                                                                            </div>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <script>
+                                                                    function toggleTooltip() {
+                                                                        var tip = document.getElementById('tooltip');
+                                                                        if (tip.className == 'closedTooltip') {
+                                                                            tip.className = 'calledTooltip';
+                                                                        } else {
+                                                                            tip.className = 'closedTooltip';
+                                                                        }
+                                                                        return false;
+                                                                    }
+                                                                </script>
+                                                            </a>
+                                                        </label>
+                                                        <div class="placeholder_top">
+                                                            <input id="card.cvv" name="card.cvv" class="inp_cvv" type="text"
+                                                            maxlength="4" value="" placeholder="CVV">
+                                                            <span id="cardcvv_placeholder" class="placeholder"
+                                                            style="color: rgb(255, 255, 255);">CVV</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="placeholder_top">
+                                                        <input type="text" id="card.holderName" name="card.holderName"
+                                                        maxlength="30" value="" class="inp_full"
+                                                        placeholder="Όνομα Κατόχου">
+                                                        <span id="cardholder_placeholder" class="placeholder"
+                                                        style="color: rgb(255, 255, 255);">Όνομα Κατόχου</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="3">
+                                                    <div class="paymentMethodHolder">
+                                                        <div class="radiogroup">
+                                                            <label for="status1">captured</label>
+                                                            <input type="radio" id="status1" name="status" value="captured"
+                                                            checked>
+                                                        </div>
+                                                        <div class="radiogroup">
+                                                            <label for="status2">canceled</label>
+                                                            <input type="radio" id="status2" name="status" value="canceled">
+                                                        </div>
+                                                        <div class="radiogroup">
+                                                            <label for="status3">refused</label>
+                                                            <input type="radio" id="status3" name="status" value="refused">
+                                                        </div>
+                                                        <div class="radiogroup">
+                                                            <label for="status4">error</label>
+                                                            <input type="radio" id="status4" name="status" value="error">
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <style>
+                                        .radiogroup {
+                                            float: left;
+                                        }
+
+                                        .radiogroup input {
+                                            display: inline;
+                                            margin-left: 0;
+                                            margin-right: 12px;
+                                        }
+
+                                        .radiogroup label {
+                                            display: inline-block;
+                                            font-size: 0.85rem;
+                                        }
+                                    </style>
+                                    <div id="buttons" style="display: block">
+                                        <div class="div_btn_cancel">
+                                            <input class="btn btn_cancel" id="cancelBtn" type="button" name="cancel"
+                                            value="ΑΚΥΡΩΣΗ" onclick="return CanselPayment();">
+                                        </div>
+                                        <div class="div_btn_paymt">
+                                            <input class="btn btn_paymt" id="proceedBtn" type="button" name="makepayment"
+                                            value="ΠΛΗΡΩΜΗ" onclick="return CheckFields(false);">
+                                        </div>
+                                    </div>
+                                    <table>
+                                        <tbody>
+                                            <tr></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="someOtherStuff"></div>
+                    <div id="debug"></div>
+
+                    <div id="errpopup" class="errpopup">
+                        <div class="errpopuphead">
+                            <img onclick="closeErrorPopup();" border="0" src="~/Content/cardlink-eurobank/images/x.gif"
+                            alt="X">
+                        </div>
+                        <div class="errpopupmsg" id="errpopupmsg">&nbsp;</div>
+                    </div>
+
+                    <div id="infopopup" class="infopopup">
+                        <div class="infopopuphead">
+                            <img onclick="closeInfoPopup();" border="0" src="~/Content/cardlink-eurobank/images/x.gif"
+                            alt="X">
+                        </div>
+                        <div class="infopopupmsg" id="infopopupmsg">&nbsp;</div>
+                    </div>
+
+                    <iframe id="iebug1" src="" scrolling="no" frameborder="0"
+                    style="position:absolute; top:0px; left:0px; display:none;"></iframe>
+
+                </center>
+            </div>
+        </div>
+    } else{
+        <div id="outer">
+            <div id="popup">
+                <center>
+                    <div class="order">
+                        <form name="payform" id="payform1" method="POST" action="@Url.Action("ProcessPaymentAsync","Home")" accept_charset="UTF-8">
+                            <input name="Id" id="Id" type="hidden" value="@(Model.Id)">
+                            <input name="mid" id="mid" type="hidden" value="@(Model.mid)">
+                            <input name="orderid" id="orderid" type="hidden" value="@(Model.orderid)">
+                            <input name="orderAmount" id="orderAmount" type="hidden" value="@(Model.orderAmount)">
+                            <input name="currency" id="currency" type="hidden" value="@(Model.currency)">
+                            <input name="cardNum" id="cardNum" type="hidden" value="">
+                            <input name="confirmUrl" id="confirmUrl" type="hidden" value="@Model.confirmUrl">
+                            <input name="cancelUrl" id="cancelUrl" type="hidden" value="@Model.cancelUrl">
+
+                            <div id="div_left">
+                                <div class="empty_element">&nbsp;</div>
+                                <div class="div_left_inner">
+
+                                    <img src="~/Content/cardlink-eurobank/images/eurobank.png" class="img_center">
+
+                                    <p id="txt_redirect">Έχετε μεταφερθεί στο ασφαλές περιβάλλον πληρωμών της Eurobank.</p>
+                                    <p id="txt_trans_details">Λεπτομέρειες Συναλλαγής</p>
+
+                                    <img src="" class="img_center">
+
+                                    <table id="tbl_details">
+                                        <tbody>
+                                            <tr>
+                                                <td class="td_left-aln">Επιχείρηση:</td>
+                                                <td>TEST</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="td_left-aln">Ιστοσελίδα:</td>
+                                                <td>https://test.gr/</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <div id="div_order_amt">
+                                        <p class="txt_order_amt">
+                                            Ποσό Παραγγελίας:
+                                            <span id="txt_order_amt_val"><br>@(Model.orderAmount)&nbsp;€</span>
+                                        </p>
+                                    </div>
+
+                                    <div class="img_group">
+                                        <a href="http://www.visa.gr/gr/kaptec_yia_onouc/online_ayopec/verified_by_visa.aspx"
+                                            target="_blank" style="text-decoration: none">
+                                            <img src="~/Content/cardlink-eurobank/images/visa_verified.png">
+                                        </a>
+                                        <a href="http://www.mastercard.com/gr/consumer/secure-code.html" target="_blank"
+                                            style="text-decoration: none">
+                                            <img src="~/Content/cardlink-eurobank/images/mastercard_securecode.png">
+                                        </a>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div id="div_right">
+                                <div class="div_right_inner">
+                                    <h2>Σφάλμα επαλήθευσης</h2>
+                                    <div>
+                                        <p> Αποσταλθέν Digest: @Model.digest</p>
+                                        <p> Υπολοισθέν Digest: @Model.calculatedDigest</p>
+                                    </div>                               
+                                    
+                                    <div id="buttons" style="display: block">
+                                        <div class="div_btn_cancel">
+                                            <input class="btn btn_cancel" id="cancelBtn" type="button" name="cancel"
+                                                value="ΑΚΥΡΩΣΗ" onclick="return CanselPayment();">
+                                        </div>
+                                    </div>                                
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                </center>
+            </div>
+        </div>
+    }
+   
+
+
+</body>
+
+</html>

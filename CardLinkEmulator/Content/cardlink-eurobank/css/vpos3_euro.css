@@ -1,0 +1,552 @@
+@font-face {
+    font-family: 'EurobankSans-Regular';
+    src: url(./fonts/EurobankSans-Regular.woff) format('woff')
+}
+
+@font-face {
+    font-family: 'EurobankSans-Light';
+    src: url(./fonts/EurobankSans-Light.woff) format('woff')
+}
+
+@font-face {
+    font-family: 'EurobankSans-Bold';
+    src: url(./fonts/EurobankSans-Bold.woff) format('woff')
+}
+
+@media screen and (min-width:1280px) {
+	#tooltip_top {
+    position: absolute;
+    right: -15px;
+    top: -140px
+	}
+}
+@media screen and (max-width:1280px) {
+	#tooltip_top {
+    position: absolute;
+    right: 300px;
+    top: -330px;
+	}
+}
+    
+@media screen and (max-width:850px) {
+    #div_left,
+	#div_result_left,
+    #div_right {
+        display: block!important;
+    }
+    #popup {
+        width: 320px!important;
+		margin-bottom: 10px;
+    }
+    #outer {
+        top: 0px!important;
+        margin-top: 0px!important;
+    }
+	#div_left,
+    #div_result_left {
+        border-radius: 8px 8px 0px 0px!important
+    }
+    #div_right {
+        width: 320px!important;
+        border-radius: 0px 0px 8px 8px!important;
+		height: 420px!important;
+		
+    }
+}
+
+#outer {
+    position: absolute;
+    top: 50%;
+    margin-top: -238px;
+    left: 0;
+    width: 100%;
+}
+
+#popup {
+    margin-left: auto;
+    margin-right: auto;
+    width: 850px;
+    padding: 0px;
+    z-index: 999;
+    -webkit-box-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.6);
+    -moz-box-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.6);
+    box-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.6);
+    display: table;
+    border-radius: 8px;
+}
+
+.placeholder_top {
+    display: inline-block;
+    position: relative
+}
+
+.placeholder {
+    font-family: 'EurobankSans-Regular', Fallback, sans-serif;
+    position: absolute;
+    pointer-events: none;
+    top: 6px;
+    left: 4px;
+    font-size: 11px;
+    color: rgba(0, 0, 0, 0);
+}
+
+.textMain {
+    padding-top: 16px
+}
+
+#btn_back {
+    text-align: left;
+    padding-bottom: 16px
+}
+
+.lbl_top,
+input,
+label {
+    font-family: 'EurobankSans-Regular', Fallback, sans-serif
+}
+
+input,
+label {
+    display: block;
+    color: #4a4a4a;
+    font-size: 12pt
+}
+
+.lbl_top {
+    font-size: 10pt;
+}
+
+.div_top {
+    display: table
+}
+
+#div_left {
+    display: table-cell;
+    height: 400px;
+    background-color: #f2f2f2;
+    padding: 10px;
+    border-radius: 8px 0px 0px 8px;
+}
+
+#div_result_left {
+    height: 400px;
+    background-color: #f2f2f2;
+    padding: 10px;
+    border-radius: 8px 0px 0px 8px;
+}
+
+.div_left_inner {
+    display: block;
+    width: 300px
+}
+
+#div_right {
+    display: table-cell;
+    width: 530px;
+    height: 400px;
+    background-color: #fafafa;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 0px 8px 8px 0px;
+}
+
+.div_right_inner {
+    display: table;
+}
+
+#div_card_date {
+    display: table-cell;
+    padding: 0px;
+}
+
+#div_card_cvv {
+    display: table-cell;
+    padding-left: 8px
+}
+
+input[type=text],
+select {
+    margin: 6px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    background-color: white!important;
+    border-radius: 4px;
+    box-sizing: border-box
+}
+
+select {
+    text-align-last: center
+}
+
+.inp_full {
+    padding: 10px;
+    width: 290px;
+    display: block
+}
+
+.inp_date {
+    text-align: center;
+    width: 76px;
+    padding: 10px 4px;
+    font-family: 'EurobankSans-Regular', Fallback, sans-serif;
+    font-size: 12pt;
+    color: #4a4a4a;
+}
+
+.inp_cvv {
+    width: 113px;
+    padding: 10px;
+    margin-left: 26px;
+    text-align: center
+}
+
+.btn_cancel,
+.btn_paymt {
+    font-family: 'EurobankSans-Bold', Fallback, sans-serif;
+    font-size: 12pt;
+    background-color: #f2f2f2;
+    color: #4a4a4a;
+    border: 1px solid #d2d2d2!important;
+    border-radius: 4px
+}
+
+.btn_paymt {
+    background-color: #0c6db2;
+    color: #fff;
+}
+
+.btn_cancel:hover {
+    background-color: #d2d2d2;
+}
+
+.btn_paymt:hover {
+    background-color: #004d92;
+}
+
+.div_btn_cancel,
+.div_btn_paymt {
+    padding-top: 8px;
+    display: inline-block
+}
+
+.div_btn_paymt {
+    padding-left: 10px
+}
+
+input[type=submit],
+input[type=button] {
+  width: 135px;
+  padding: 10px 20px;
+  margin: 8px 0;
+  border: 0;
+  cursor: pointer
+}
+
+.error {
+    font-family: 'EurobankSans-Bold', Fallback, sans-serif;
+    font-weight: 700;
+    font-size: 11pt;
+    color: #e52600;
+    text-align: center;
+    margin-top: 0
+}
+
+.txt_order_amt {
+    font-family: 'EurobankSans-Regular', Fallback, sans-serif;
+    font-size: 10pt;
+    text-align: center;
+    padding: 8px;
+    margin: 12px 32px;
+    border-style: solid;
+    border-color: #ccc;
+    border-width: 1px;
+    border-radius: 4px
+}
+
+.img_center {
+    display: block;
+    max-width: 175px;
+    max-height: 54px;
+    margin-left: auto;
+    margin-right: auto
+}
+
+.img_group {
+    text-align: center;
+    padding-top: 20px;
+    padding-bottom: 0
+}
+
+#txt_redirect {
+    font-size: 10pt;
+    text-align: center;
+    padding: 0 42px
+}
+
+.td_left-aln {
+    text-align: left
+}
+
+#tbl_details,
+#txt_redirect,
+#txt_trans_details {
+    font-family: 'EurobankSans-Light', Fallback, sans-serif;
+    color: #4a4a4a;
+}
+
+#tbl_details {
+    width: 100%;
+    font-size: 9pt;
+    margin-top: 15px;
+    margin: 12px 32px
+}
+
+#txt_trans_details {
+    text-align: center;
+    margin-top: 24px;
+    margin-bottom: 14px;
+    font-size: 18pt
+}
+
+#txt_order_amt_val {
+    font-family: 'EurobankSans-Bold', Fallback, sans-serif;
+    color: #4a4a4a;
+    font-size: 18pt;
+    white-space: nowrap
+}
+
+.txt_enter_card,
+.txt_intro_enter_card_gr,
+.txt_intro_enter_card_en,
+#txt_intro_pay_wallet_gr,
+#txt_intro_pay_wallet_en {
+    font-family: 'EurobankSans-Light', Fallback, sans-serif;
+    color: #4a4a4a;
+    margin-top: 12px;
+}
+
+.txt_enter_card_in {
+    font-family: 'EurobankSans-Light', Fallback, sans-serif;
+    color: #4a4a4a;
+    font-size: 16pt;
+    margin-top: 12px;
+    margin-bottom: 6px
+}
+
+.txt_reuse_card {
+    font-family: 'EurobankSans-Light', Fallback, sans-serif;
+    font-size: 11pt;
+    color: #4a4a4a;
+}
+
+#txt_intro_pay_wallet_gr {
+    margin-top: 36px;
+    font-size: 16pt;
+    margin-bottom: 0
+}
+
+#txt_intro_pay_wallet_en {
+    font-size: 28pt;
+    margin-bottom: 0
+}
+
+#txt_intro_enter_card_gr {
+    font-size: 22pt;
+    margin-bottom: 6px
+}
+
+#txt_intro_enter_card_en {
+    font-size: 28pt;
+    margin-bottom: 6px
+}
+
+#info_icon {
+    display: inline-block;
+    position: relative;
+    padding-left: 0
+}
+
+.img_grp {
+    padding: 2px 0
+}
+
+.tbl_img_group {
+    width: 100%;
+    margin-bottom: 20px
+}
+
+.img_grp_td {
+    height: 30px;
+    text-align: center;
+    border-radius: 8px;
+    border-color: #fff;
+    background: #eee;
+    padding: 2px 4px;
+    margin-right: 4px
+}
+
+.empty_element {
+    font-size: 0
+}
+
+#txt_back,
+#txt_back_arrow {
+    font-family: 'EurobankSans-Light', Fallback, sans-serif;
+    color: #0c6db2
+}
+
+#txt_back {
+    text-decoration: underline;
+    font-size: 11pt
+}
+
+#txt_back_arrow {
+    padding-right: 2px
+}
+
+a.tooltip {
+    outline: 0;
+    color: #4a4a4a;
+    text-decoration: none
+}
+
+a.tooltip span {
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    -moz-box-shadow: 5px 5px 8px #ccc;
+    -webkit-box-shadow: 5px 5px 8px #ccc;
+    box-shadow: 5px 5px 8px #ccc;
+    z-index: 10;
+    display: none;
+    width: 300px;
+    line-height: 16px;
+    margin: 0;
+    padding: 5px;
+    border: 1px solid #4a4a4a;
+    background: #fff;
+    color: #4a4a4a
+}
+
+a.tooltip strong {
+    line-height: 30px
+}
+
+.closedTooltip,
+span#tooltip.closedTooltip {
+    display: none
+}
+
+.calledTooltip {
+    display: inline;
+    text-align: center;
+    position: absolute;
+    color: #111;
+    border: 1px solid #dca;
+    background: #fffaf0;
+}
+
+span#tooltip.calledTooltip {
+    display: inline
+}
+
+input.radio {
+    display: block;
+    margin: 0 auto
+}
+
+.cardSelectionBlock {
+    padding-top: 10px;
+    height: 70px;
+    display: inline-block
+}
+
+label>input {
+    visibility: hidden;
+    position: absolute
+}
+
+label>input+img {
+    border: 2px solid transparent
+}
+
+label>input:checked+img {
+    border: 2px solid #0c6db2;
+    background: #0c6db2
+}
+
+.errpopup {
+    position: absolute;
+    left: 0;
+    top: 0;
+    visibility: hidden;
+    width: 182px;
+    height: 122px;
+    background-color: #ebdcdc;
+    border: solid #c0a9a1
+}
+
+.errpopupmsg {
+    text-align: center;
+    padding: 5px;
+    color: #e52600;
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 700
+}
+
+.errpopuphead {
+    text-align: right;
+    margin: 5px 5px 0 0
+}
+
+.infopopup {
+    position: absolute;
+    left: 0;
+    top: 0;
+    visibility: hidden;
+    width: 152px;
+    height: 102px;
+    background-color: #dcdceb
+}
+
+.infopopuphead {
+    text-align: right;
+    margin: 5px 5px 0 0
+}
+
+.infopopupmsg {
+    text-align: center;
+    padding: 5px;
+    color: #333;
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 700
+}
+
+.paymentMethodHolder {
+    padding: 0;
+    clear: none;
+    overflow: hidden;
+    text-align: center
+}
+
+.waitoverlay {
+    position: absolute;
+    left: 30%;
+    top: 10%;
+    height: 325px;
+    width: 575px;
+    background-color: rgb(110, 100, 100);
+    border: solid rgb(70, 50, 50) 2px;
+    z-index: 1;
+    filter: alpha(opacity=75);
+    /* CSS3 standard */
+    opacity: 0.75;
+    text-align: center;
+}
+
+#waitoverlayMsg {
+    font-size: 18px;
+    color: rgb(250, 50, 50);
+}
