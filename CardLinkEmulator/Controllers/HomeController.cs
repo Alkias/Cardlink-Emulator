@@ -11,6 +11,7 @@ using CardLinkEmulator.DAL.Entities;
 using CardLinkEmulator.Helpers;
 using CardLinkEmulator.Models;
 using CardLinkEmulator.Repositories;
+using Microsoft.Ajax.Utilities;
 
 namespace CardLinkEmulator.Controllers
 {
@@ -76,7 +77,9 @@ namespace CardLinkEmulator.Controllers
             var message = "";
             var redirectionUrl = pmt.confirmUrl;
             var concatStr = "";
-            var payMethod = status.ToLowerInvariant() == Status.CAPTURED.ToString().ToLowerInvariant() ? CommonHelper.FindCreditCardType(pmt.cardNum).ToString() : "";
+            var payMethod = "";
+            if (!pmt.cardNum.IsNullOrWhiteSpace())
+                payMethod = status.ToLowerInvariant() == Status.CAPTURED.ToString().ToLowerInvariant() ? CommonHelper.FindCreditCardType(pmt.cardNum).ToString() : "";
 
             Payment payment = _paymentRepository.GetById(pmt.Id);
 
@@ -105,7 +108,7 @@ namespace CardLinkEmulator.Controllers
                         break;
                 }
 
-                payment.cardNum = pmt.cardNum;
+                payment.cardNum = !pmt.cardNum.IsNullOrWhiteSpace()? payment.cardNum = pmt.cardNum: payment.cardNum = "";
                 payment.riskScore = riskScore;
                 payment.status = status;
                 payment.payMethod = payMethod;
@@ -231,6 +234,26 @@ namespace CardLinkEmulator.Controllers
             var secret = ConfigurationManager.AppSettings["secret"];
             var version = string.IsNullOrWhiteSpace(pmt.Version) ? "" : pmt.Version;
 
+            /*
+                "2",
+                mid,
+                lang,
+                orderId,
+                orderDesc,
+                orderAmount,
+                currency,
+                payerEmail,
+                billingCountry,
+                billingZipPostalCode,
+                billingCity,
+                billingAddress,
+                extInstallmentOffset,
+                extInstallmentPeriod,
+                confirmUrl,
+                cancelUrl,
+                sharedSecretKey
+             */
+
             var concatenatedFields =
                 version
                 + pmt.mid
@@ -244,8 +267,8 @@ namespace CardLinkEmulator.Controllers
                 + pmt.billZip
                 + pmt.billCity
                 + pmt.billAddress
-                + extInstallmentoffset
-                + extInstallmentperiod
+                + pmt.extInstallmentoffset
+                + pmt.extInstallmentperiod
                 + pmt.confirmUrl
                 + pmt.cancelUrl
                 + secret;

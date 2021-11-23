@@ -105,6 +105,15 @@
                                             <span id="txt_order_amt_val"><br>@(Model.orderAmount)&nbsp;€</span>
                                         </p>
                                     </div>
+                                    
+                                    @if (Model.extInstallmentperiod != null) {
+                                        <div id="div_order_installments">
+                                            <p class="txt_order_amt">
+                                                Δόσεις:
+                                                <span id="txt_order_amt_val"><br>@(Model.extInstallmentperiod)&nbsp;€</span>
+                                            </p>
+                                        </div>
+                                    }
 
                                     <div class="img_group">
                                         <a href="http://www.visa.gr/gr/kaptec_yia_onouc/online_ayopec/verified_by_visa.aspx"
@@ -496,12 +505,14 @@
                                     <div>
                                         <p> Αποσταλθέν Digest: @Model.digest</p>
                                         <p> Υπολοισθέν Digest: @Model.calculatedDigest</p>
-                                    </div>                               
+                                    </div>
+                                    
+                                   
                                     
                                     <div id="buttons" style="display: block">
                                         <div class="div_btn_cancel">
                                             <input class="btn btn_cancel" id="cancelBtn" type="button" name="cancel"
-                                                value="ΑΚΥΡΩΣΗ" onclick="return CanselPayment();">
+                                                value="ΑΚΥΡΩΣΗ" onclick="window.location.href='@Model.cancelUrl'">
                                         </div>
                                     </div>                                
                                 </div>
