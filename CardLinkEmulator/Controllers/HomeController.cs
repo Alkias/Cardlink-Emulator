@@ -37,11 +37,7 @@ namespace CardLinkEmulator.Controllers
             return View();
         }
 
-        public ActionResult About() {
-            var payments = _paymentRepository.Payments.OrderByDescending(x => x.DateInserted).ToList();
-
-            return View(payments);
-        }
+       
 
         public ActionResult Contact() {
             ViewBag.Message = "Your contact page.";
@@ -157,6 +153,12 @@ namespace CardLinkEmulator.Controllers
             response.End();
 
             return Content("Redirected");
+        }
+
+        public ActionResult OldPayments() {
+            var payments = _paymentRepository.Payments.OrderByDescending(x => x.DateInserted).ToList();
+
+            return View(payments);
         }
 
         public ActionResult BackConfirmation (int paymentId) {
